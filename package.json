@@ -1,0 +1,9 @@
+{
+  "name": "timbre-qr",
+  "version": "1.0.0",
+  "description": "Timbre digital con QR y Telegram",
+  "private": true,
+  "dependencies": {
+    "@upstash/redis": "^1.34.0"
+  }
+}

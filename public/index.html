@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Timbre</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --cream: #F5F0E8;
+      --ink: #1A1714;
+      --rust: #C4541A;
+      --rust-dark: #9E3F10;
+      --muted: #8A8278;
+      --border: #D4CCBB;
+    }
+
+    html, body {
+      height: 100%;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background-color: var(--cream);
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    /* Grain texture overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .card {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 420px;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 48px 40px 40px;
+      box-shadow: 0 2px 40px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.05);
+      animation: fadeUp 0.5s ease both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .bell-icon {
+      width: 48px;
+      height: 48px;
+      margin-bottom: 24px;
+      color: var(--rust);
+      animation: ring 2.5s ease 0.8s both;
+      transform-origin: top center;
+    }
+
+    @keyframes ring {
+      0%, 100% { transform: rotate(0deg); }
+      10% { transform: rotate(14deg); }
+      20% { transform: rotate(-12deg); }
+      30% { transform: rotate(10deg); }
+      40% { transform: rotate(-8deg); }
+      50% { transform: rotate(6deg); }
+      60% { transform: rotate(0deg); }
+    }
+
+    h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 2rem;
+      line-height: 1.15;
+      color: var(--ink);
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      font-size: 0.875rem;
+      color: var(--muted);
+      margin-bottom: 32px;
+      font-weight: 300;
+      line-height: 1.5;
+    }
+
+    label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 100px;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 12px 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9375rem;
+      color: var(--ink);
+      background: var(--cream);
+      resize: vertical;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+      margin-bottom: 20px;
+    }
+
+    textarea::placeholder { color: #B8B0A4; }
+
+    textarea:focus {
+      border-color: var(--rust);
+      box-shadow: 0 0 0 3px rgba(196, 84, 26, 0.12);
+    }
+
+    button {
+      width: 100%;
+      padding: 16px;
+      background: var(--rust);
+      color: white;
+      border: none;
+      border-radius: 3px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1rem;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    button:hover { background: var(--rust-dark); }
+    button:active { transform: scale(0.98); }
+    button:disabled { background: var(--border); cursor: not-allowed; transform: none; }
+
+    .btn-icon { font-size: 1.1rem; }
+
+    /* Estado feedback */
+    .feedback {
+      display: none;
+      margin-top: 16px;
+      padding: 12px 16px;
+      border-radius: 3px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      text-align: center;
+    }
+
+    .feedback.success {
+      display: block;
+      background: #EAF5EC;
+      color: #2D6A35;
+      border: 1px solid #B8DFC0;
+    }
+
+    .feedback.error {
+      display: block;
+      background: #FEF0EC;
+      color: #9E3F10;
+      border: 1px solid #F5C8B8;
+    }
+
+    /* Pantalla desactivado */
+    .offline-screen {
+      text-align: center;
+      animation: fadeUp 0.5s ease both;
+    }
+
+    .offline-screen .icon {
+      font-size: 3rem;
+      margin-bottom: 20px;
+      display: block;
+    }
+
+    .offline-screen h1 {
+      margin-bottom: 12px;
+    }
+
+    .offline-screen p {
+      font-size: 0.9375rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 28px 0 24px;
+    }
+
+    .address-hint {
+      font-size: 0.75rem;
+      color: var(--border);
+      text-align: center;
+      letter-spacing: 0.05em;
+    }
+  </style>
+</head>
+<body>
+
+<div class="card" id="app">
+  <div id="loading" style="text-align:center; color: var(--muted); font-size:0.9rem;">Cargando…</div>
+</div>
+
+<script>
+  const app = document.getElementById('loading').parentElement;
+
+  async function init() {
+    try {
+      const res = await fetch('/api/status');
+      const data = await res.json();
+      if (data.active) {
+        renderForm();
+      } else {
+        renderOffline();
+      }
+    } catch(e) {
+      renderOffline();
+    }
+  }
+
+  function renderOffline() {
+    app.innerHTML = `
+      <div class="offline-screen">
+        <span class="icon">🌙</span>
+        <h1>No disponible</h1>
+        <p>El timbre no está activo en este momento.<br>Intentá más tarde.</p>
+      </div>
+    `;
+  }
+
+  function renderForm() {
+    app.innerHTML = `
+      <svg class="bell-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+      </svg>
+      <h1>Tocar timbre</h1>
+      <p class="subtitle">Dejá un mensaje y avisamos que estás en la puerta.</p>
+      <label for="msg">Tu mensaje (opcional)</label>
+      <textarea id="msg" placeholder="Ej: Soy el delivery de Rappi…"></textarea>
+      <button id="btn" onclick="enviar()">
+        <span class="btn-icon">🔔</span>
+        Tocar timbre
+      </button>
+      <div class="feedback" id="feedback"></div>
+      <hr class="divider" />
+      <p class="address-hint">TIMBRE DIGITAL · PH</p>
+    `;
+  }
+
+  async function enviar() {
+    const btn = document.getElementById('btn');
+    const feedback = document.getElementById('feedback');
+    const msg = document.getElementById('msg').value.trim();
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="btn-icon">⏳</span> Enviando…';
+    feedback.className = 'feedback';
+
+    try {
+      const res = await fetch('/api/ring', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: msg })
+      });
+      const data = await res.json();
+      if (data.ok) {
+        feedback.className = 'feedback success';
+        feedback.textContent = '✓ ¡Aviso enviado! Ya saben que estás en la puerta.';
+        btn.innerHTML = '<span class="btn-icon">✓</span> Enviado';
+        document.getElementById('msg').disabled = true;
+      } else {
+        throw new Error(data.error || 'Error');
+      }
+    } catch(e) {
+      feedback.className = 'feedback error';
+      feedback.textContent = 'No se pudo enviar. Intentá de nuevo.';
+      btn.disabled = false;
+      btn.innerHTML = '<span class="btn-icon">🔔</span> Tocar timbre';
+    }
+  }
+
+  init();
+</script>
+</body>
+</html>
