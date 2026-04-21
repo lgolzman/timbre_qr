@@ -61,7 +61,7 @@
       background: white;
       border: 1px solid var(--border);
       border-radius: 4px;
-      padding: 48px 40px 40px;
+      padding: 32px 28px 28px;
       box-shadow: 0 2px 40px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.05);
       animation: fadeUp 0.5s ease both;
     }
@@ -130,7 +130,7 @@
     .subtitle {
       font-size: 0.875rem;
       color: var(--muted);
-      margin-bottom: 32px;
+      margin-bottom: 20px;
       font-weight: 300;
       line-height: 1.5;
     }
@@ -147,7 +147,7 @@
 
     textarea {
       width: 100%;
-      min-height: 100px;
+      min-height: 70px;
       border: 1px solid var(--border);
       border-radius: 3px;
       padding: 12px 14px;
@@ -257,7 +257,33 @@
     .divider {
       border: none;
       border-top: 1px solid var(--border);
-      margin: 28px 0 24px;
+      margin: 20px 0 16px;
+    }
+
+    input[type="tel"] {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 12px 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9375rem;
+      color: var(--ink);
+      background: var(--cream);
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+      margin-bottom: 20px;
+    }
+
+    input[type="tel"]:focus {
+      border-color: var(--rust);
+      box-shadow: 0 0 0 3px rgba(196, 84, 26, 0.12);
+    }
+
+    .phone-hint {
+      font-size: 0.8125rem;
+      color: var(--muted);
+      margin-bottom: 8px;
+      font-style: italic;
     }
 
     .address-hint {
@@ -313,6 +339,9 @@
       <p class="subtitle">Dejá un mensaje y avisamos que estás en la puerta.</p>
       <label for="msg">Tu mensaje (opcional)</label>
       <textarea id="msg" placeholder="Ej: Soy el delivery de Rappi…"></textarea>
+      <label for="phone">Tu teléfono (opcional)</label>
+      <p class="phone-hint">Si no estamos, te llamamos</p>
+      <input type="tel" id="phone" placeholder="Ej: 11 2345-6789" />
       <button id="btn" onclick="enviar()">
         <span class="btn-icon">🔔</span>
         Tocar timbre
@@ -327,6 +356,7 @@
       const btn = document.getElementById('btn');
       const feedback = document.getElementById('feedback');
       const msg = document.getElementById('msg').value.trim();
+      const phone = document.getElementById('phone').value.trim();
 
       btn.disabled = true;
       btn.innerHTML = '<span class="btn-icon">⏳</span> Enviando…';
@@ -336,7 +366,7 @@
         const res = await fetch('/api/ring', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: msg })
+          body: JSON.stringify({ message: msg, phone: phone })
         });
         const data = await res.json();
         if (data.ok) {
@@ -344,6 +374,7 @@
           feedback.textContent = '✓ ¡Aviso enviado! Ya saben que estás en la puerta.';
           btn.innerHTML = '<span class="btn-icon">✓</span> Enviado';
           document.getElementById('msg').disabled = true;
+          document.getElementById('phone').disabled = true;
         } else {
           throw new Error(data.error || 'Error');
         }

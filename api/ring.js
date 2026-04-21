@@ -14,7 +14,7 @@ export default async function handler(req, res) {
     return res.status(403).json({ ok: false, error: 'Timbre desactivado' });
   }
 
-  const { message } = req.body || {};
+  const { message, phone } = req.body || {};
   const token = process.env.TELEGRAM_BOT_TOKEN;
   const chatId = process.env.TELEGRAM_CHAT_ID;
 
@@ -23,9 +23,10 @@ export default async function handler(req, res) {
     return res.status(500).json({ ok: false, error: 'Configuración incompleta' });
   }
 
-  const text = message
-    ? `🔔 *¡Alguien tocó el timbre!*\n\n💬 Mensaje: _${message}_`
-    : `🔔 *¡Alguien tocó el timbre!*\n\n_(sin mensaje)_`;
+  let text = '🔔 *¡Alguien tocó el timbre!*\n\n';
+  if (message) text += `💬 Mensaje: _${message}_\n`;
+  if (phone) text += `📞 Teléfono: ${phone}\n`;
+  if (!message && !phone) text += '_(sin mensaje)_';
 
   try {
     const tgRes = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
